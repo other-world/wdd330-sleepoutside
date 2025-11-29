@@ -1,7 +1,11 @@
-import { getLocalStorage, setLocalStorage } from "./utils.mjs";
+import {
+  setLocalStorage,
+  getLocalStorage,
+  discountPrice,
+  alertMessage,
+} from "./utils.mjs";
 
 export default class ProductDetails {
-
   constructor(productId, dataSource) {
     this.productId = productId;
     this.product = {};
@@ -9,35 +13,173 @@ export default class ProductDetails {
   }
 
   async init() {
-    this.product = await this.dataSource.findProductById(this.productId);
-    this.renderProductDetails();
-    document
-      .getElementById("addToCart")
-      .addEventListener("click", this.addProductToCart.bind(this));
+    try {
+      this.product = await this.dataSource.findProductById(this.productId);
+      if (!this.product) {
+        document.querySelector(".product-detail").innerHTML =
+          "<h2>Product not found</h2>";
+        return;
+      }
+      this.renderProductDetails();
+      this.displayComment(this.product.Id);
+      this.setUpcommentForm();
+      
+      document
+        .getElementById("addToCart")
+        .addEventListener("click", this.addToCart.bind(this));
+        
+    } catch (error) {
+      console.error("Failed to load product:", error);
+      document.querySelector(".product-detail").innerHTML =
+        "<h2>Failed to load product</h2>";
+    }
+  
+   
+    
   }
 
-  addProductToCart() {
-    const cartItems = getLocalStorage("so-cart") || [];
-    cartItems.push(this.product);
-    setLocalStorage("so-cart", cartItems);
+  addToCart() {
+    let cart = getLocalStorage("so-cart");
+  
+    // Ensure cart is an array
+    if (!cart || !Array.isArray(cart)) {
+      cart = [];
+    }
+// Check if item already exists in cart
+  const itemInCart = cart.find(item => item.Id === this.product.Id);
+
+  // Optional: If you want to increase quantity instead of adding again
+  if (itemInCart) {
+   itemInCart.quantity = (itemInCart.quantity || 1) + 1;
+    console.log(5+5);
+  } //
+  else {
+    cart.push({ ...this.product, quantity: 1 });
+   //cart.push(this.product);}
+   }
+
+  // Add the product to comment
+  
+
+  // Save cart
+  setLocalStorage("so-cart", cart);
+
+    // Optional: Show confirmation
+    document.dispatchEvent(new CustomEvent("cartUpdated"));
+
+    // NOW WORKS 100% — static import!
+    alertMessage(`${this.product.NameWithoutBrand} added to cart!`);
+
+    const button = document.getElementById("addToCart");
+    button.textContent = "Added!";
+    button.style.backgroundColor = "#28a745";
+    setTimeout(() => {
+      button.textContent = "Add to Cart";
+      button.style.backgroundColor = "";
+    }, 1500);
   }
 
-  renderProductDetails() {
-    productDetailsTemplate(this.product);
+ // Save comment to localStorage
+addComment(productId, commentText) {
+  const allComments = JSON.parse(localStorage.getItem("comments")) || {};
+
+  if (!allComments[productId]) {
+    allComments[productId] = [];
   }
+
+  allComments[productId].push({
+    message: commentText,
+    date: new Date().toLocaleString()
+  });
+
+  localStorage.setItem("comments", JSON.stringify(allComments));
 }
 
-function productDetailsTemplate(product) {
-  document.querySelector("h2").textContent = product.Brand.Name;
-  document.querySelector("h3").textContent = product.NameWithoutBrand;
+  // comment form
 
-  const productImage = document.getElementById("productImage");
-  productImage.src = product.Image;
-  productImage.alt = product.NameWithoutBrand;
+  setUpcommentForm()
+  {
+    const form = document.getElementById("submitComment");
+    const input = document.getElementById("commentInput");
 
-  document.getElementById("productPrice").textContent = product.FinalPrice;
-  document.getElementById("productColor").textContent = product.Colors[0].ColorName;
-  document.getElementById("productDesc").innerHTML = product.DescriptionHtmlSimple;
 
-  document.getElementById("addToCart").dataset.id = product.Id;
+    form.addEventListener("click", (e) =>
+  {
+    e.preventDefault();
+
+     const commentText = input.value.trim();
+
+
+    if(commentText ==="")
+    {
+      alert("please write soething!");
+      return;
+    }
+    
+    this.addComment(this.product.Id,commentText);
+    this.displayComment(this.product.Id);
+    input.value ="";
+
+
+  })
+  }
+
+  getComments(productId){
+    const allComments = JSON.parse(localStorage.getItem("productComments")) || {};
+    return allComments[productId] || [];
+  }
+   
+
+
+displayComment(productId) {
+  const commentsList = document.getElementById("comments-list");
+  const allComments = JSON.parse(localStorage.getItem("comments")) || {};
+  const comments = allComments[productId] || [];
+
+  commentsList.innerHTML = "";
+
+   comments.slice().reverse().forEach(comment => {
+    if (!comment || !comment.message) return; // skip null/invalid items
+
+    const div = document.createElement("div");
+    div.className = "comment";
+    div.innerHTML = `
+      <p>${comment.message}</p>
+      <small>${comment.date}</small>
+    `;
+    commentsList.appendChild(div);
+  });
+}
+
+  renderProductDetails() {
+    const discount = discountPrice(
+      this.product.FinalPrice,
+      this.product.SuggestedRetailPrice,
+    );
+
+    document.querySelector(".product-detail").innerHTML = `
+      <h3>${this.product.Brand.Name}</h3>
+      <h2 class="divider">${this.product.NameWithoutBrand}</h2>
+      <img class="divider" src="${this.product.Images.PrimaryLarge || this.product.Images.PrimaryMedium}" alt="${this.product.NameWithoutBrand}" />
+      <p class="product-card__price">
+        $${this.product.FinalPrice}
+        ${discount > 0 ? `<span class="product-discount">${discount}% OFF</span>` : ""}
+      </p>
+      <p class="product__color">${this.product.Colors?.[0]?.ColorName || "Color not available"}</p>
+      <p class="product__description">${this.product.DescriptionHtmlSimple}</p>
+      <div class="product-detail__add">
+        <button id="addToCart" data-id="${this.product.Id}">Add to Cart</button>
+      </div>
+      
+       <div class="comment-section">
+        <h3>Comments</h3>
+        <textarea id="commentInput" placeholder="write your comment...."></textarea>
+        <button id="submitComment">Submit</button>
+        <div id="comments-list"></div>
+    </div>
+
+    `;
+
+    document.title = `${this.product.NameWithoutBrand} | Sleep Outside`;
+  }
 }
