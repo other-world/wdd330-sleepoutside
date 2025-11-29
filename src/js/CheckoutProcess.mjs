@@ -1,6 +1,6 @@
 // src/js/CheckoutProcess.mjs
 import { getLocalStorage, alertMessage } from "./utils.mjs";
-import ExternalServices from "./ExternalServices.mjs"; // ← CRITICAL: Import the class!
+import ExternalServices from "./ExternalServices.mjs"; 
 
 function formDataToJSON(formElement) {
   const formData = new FormData(formElement);
@@ -87,7 +87,7 @@ export default class CheckoutProcess {
     json.orderTotal = this.orderTotal;
 
     try {
-      const services = new ExternalServices(); // ← NOW WORKS!
+      const services = new ExternalServices(); 
       const result = await services.checkout(json);
 
       console.log("Order placed successfully!", result);
@@ -99,7 +99,7 @@ export default class CheckoutProcess {
       // Clear any old alerts
       document.querySelectorAll(".alert").forEach((a) => a.remove());
 
-      // Show real server errors beautifully
+      // Show real server errors 
       if (err.name === "servicesError" && err.message?.errors) {
         for (const field in err.message.errors) {
           alertMessage(`${field}: ${err.message.errors[field]}`);

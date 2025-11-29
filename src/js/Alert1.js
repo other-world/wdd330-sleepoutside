@@ -17,8 +17,8 @@ class Alert {
                 alertMessage.textContent = alert.message;
                 alertMessage.style.backgroundColor = alert.background;
                 alertMessage.style.color = alert.color;
-                alertMessage.style.padding = "1rem"; // Add some padding for better appearance
-                alertMessage.style.margin = "0.5rem 0"; // Margin between alerts
+                alertMessage.style.padding = "1rem"; // 
+                alertMessage.style.margin = "0.5rem 0"; 
                 alertSection.appendChild(alertMessage);
             });
 

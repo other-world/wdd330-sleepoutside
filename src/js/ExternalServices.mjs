@@ -1,4 +1,3 @@
-// src/js/ExternalServices.mjs
 
 const baseURL = import.meta.env.VITE_SERVER_URL;
 
@@ -23,21 +22,21 @@ export default class ExternalServices {
   constructor() {}
 
   async getData(category) {
-    const url = `${baseURL}/products/search/${category}`; // ← This prevents double slash
+    const url = `${baseURL}/products/search/${category}`; 
     const response = await fetch(url);
     const data = await convertToJson(response);
     return data.Result;
   }
 
   async findProductById(id) {
-    const url = `${baseURL}/product/${id}`; // ← This prevents double slash
+    const url = `${baseURL}/product/${id}`; 
     const response = await fetch(url);
     const data = await convertToJson(response);
     return data.Result;
   }
 
   async checkout(payload) {
-    const url = `${baseURL}/checkout`; // ← This prevents double slash
+    const url = `${baseURL}/checkout`; 
     const options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },

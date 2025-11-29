@@ -3,12 +3,12 @@ import ExternalServices from "./ExternalServices.mjs";
 import ProductList from "./ProductList.mjs";
 import ProductDetails from "./ProductDetails.mjs";
 import CheckoutProcess from "./CheckoutProcess.mjs";
-import { getLocalStorage } from "./utils.mjs"; // ← MOVED TO TOP!
+import { getLocalStorage } from "./utils.mjs";
 
-// ——————— LOAD HEADER & FOOTER ON EVERY PAGE ———————
+//  LOAD HEADER & FOOTER ON EVERY PAGE 
 loadHeaderFooter();
 
-// ——————— PRODUCT LISTING PAGES ———————
+//  PRODUCT LISTING PAGES 
 const listElement = document.querySelector(".product-list");
 if (listElement) {
   const urlParams = new URLSearchParams(window.location.search);
@@ -18,7 +18,7 @@ if (listElement) {
   listing.init();
 }
 
-// ——————— PRODUCT DETAIL PAGE ———————
+// PRODUCT DETAIL PAGE 
 const productId = getParam("product");
 if (productId) {
   const dataSource = new ExternalServices();
@@ -26,7 +26,6 @@ if (productId) {
   product.init();
 }
 
-// ——————— CART: SHOW TOTAL & CHECKOUT BUTTON ———————
 function calculateCartTotal() {
   const cartItems = getLocalStorage("so-cart") || [];
   if (cartItems.length === 0) {
@@ -52,7 +51,6 @@ if (window.location.pathname.includes("cart")) {
 }
 document.addEventListener("cartUpdated", calculateCartTotal);
 
-// ——————— CHECKOUT PAGE: FULLY FUNCTIONAL WITH VALIDATION ———————
 if (window.location.pathname.includes("checkout")) {
   const checkout = new CheckoutProcess("so-cart", ".checkout-summary");
   checkout.init();
