@@ -1,0 +1,28 @@
+export default class ProductList{
+    constructor(category, dataSource, listElement){
+        this.category = category;
+        this.dataSource = dataSource;
+        this.listElement = listElement
+    }
+    async init(){
+        const list = await this.dataSource.getData();
+        this.renderList(list);
+    }
+    productCardTemplate(product){
+        return `
+        <li class="product-card">
+            <a href="product_pages/?product="${product}">
+            <img src="${product.Image}" alt="Image of "${product.NameWithoutBrand}">
+            <h2 class="card__brand">${product.Brand.Name}</h2>
+            <h3 class="card__name">${product.NameWithoutBrand}</h3>
+            <p class="product-card__price">&#36;${product.ListPrice}</p>
+            </a>
+        </li>`
+    }
+    renderList(list){
+        list.forEach(product => {
+        this.listElement.innerHTML += this.productCardTemplate(product);
+        });
+
+    }
+}
