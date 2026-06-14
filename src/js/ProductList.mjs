@@ -1,3 +1,5 @@
+import { renderListWithTemplate } from "./utils.mjs";
+
 export default class ProductList{
     constructor(category, dataSource, listElement){
         this.category = category;
@@ -20,9 +22,11 @@ export default class ProductList{
         </li>`
     }
     renderList(list){
-        list.forEach(product => {
-        this.listElement.innerHTML += this.productCardTemplate(product);
-        });
+        renderListWithTemplate(
+            this.productCardTemplate,
+            this.listElement,
+            list
+        );
 
     }
 }
