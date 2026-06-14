@@ -31,23 +31,17 @@ export default class ProductDetails {
     const productPage = document.querySelector(".product-detail")
     productPage.innerHTML = `
         <h3>${this.product.Brand.Name}</h3>
-
         <h2 class="divider">${this.product.NameWithoutBrand}</h2>
-
         <img
           class="divider"
           src="${this.product.Image}"
           alt="${this.product.NameWithoutBrand}"
         />
-
         <p class="product-card__price">&#36;${this.product.ListPrice}</p>
-
         <p class="product__color">${this.product.Colors[0].ColorName}</p>
-
         <p class="product__description">
           ${this.product.DescriptionHtmlSimple}
         </p>
-
         <div class="product-detail__add">
           <button id="addToCart" data-id="${this.productId}">Add to Cart</button>
         </div>`
